@@ -1,0 +1,91 @@
+#!/usr/bin/env python
+
+import urllib
+
+url1 = "http://studentnet.cs.manchester.ac.uk/ugt/COMP18112/page1.html"
+url2 = "http://studentnet.cs.manchester.ac.uk/ugt/COMP18112/page2.html"
+url3 = "http://studentnet.cs.manchester.ac.uk/ugt/COMP18112/page3.html"
+urlbase = "http://studentnet.cs.manchester.ac.uk/ugt/COMP18112/"
+
+def load_webpage(url):
+  data = urllib.urlopen(url)
+  tokens = data.read().split()
+  print tokens
+
+  #task 1.2 -----------
+  #Remove the html tags
+
+  bold_start = '\033[1m\b'
+  bold_end = '\033[0m\b'
+
+  printable = True
+
+  #-------------------------------------------------------
+  #Functions for the browser
+
+  links = list()
+
+  #Deal with a link
+  def deal_with_link(token):
+    link = token.split('"')[1]
+    link = process_link(link)
+    links.append(link)
+    
+  #process the link
+  def process_link(link):
+    new_link = urlbase + link[2:]
+    return new_link
+
+
+  print '------------------------------------------'
+  print bold_start, 'Beginning of the page', bold_end
+
+  for token in tokens:
+    if token[0] == '<' and token[1] != '/':
+      #We have an html tag
+      
+      #If te tag has no attributes allow printing, otherwsie not
+      if token[len(token) - 1] != '>':
+        printable = False
+      
+      if token == '<title>':
+        print 'TITLE: ',
+      elif token == '<p>':
+        print '\nPARAGRAPH: ',
+      elif token == '<em>':
+        print bold_start,
+      elif token == '<h1>':
+        print '\nHEADING:',
+    elif token[len(token) - 1] == '>':
+      printable = True;
+      if token.find('href') >= 0:
+        deal_with_link(token)      
+    #Ending tag
+    elif token[1] == '/':
+      if token == '</em>':
+        print bold_end,
+    elif printable is True:
+      print token,
+    elif printable is False:
+      if token.find('href') >= 0:
+        deal_with_link(token)  
+
+  #----------------------------------------------------      
+  #Print the links.....
+
+  index = 0
+  print 
+  for link in links:
+    index = index + 1
+    print index, ':', link
+
+  #-----------------------------------------------------  
+  #Link selection
+  link_number = int(raw_input('Select a link:'))
+  print link_number - 1
+  load_webpage(links[link_number - 1])
+ 
+load_webpage(url3)  
+   
+    
+    
